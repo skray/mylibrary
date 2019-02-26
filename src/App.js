@@ -9,7 +9,7 @@ function Navigation() {
   return (
     <nav className="header navbar navbar-expand-lg navbar-light bg-light">
       <a className="navbar-brand" href="/">
-        <img src={booksLogo} className="d-inline-block align-middle mr-2" width="30" height="30" alt="" />
+        <img src={booksLogo} className="d-inline-block mr-2" width="21" alt="" />
         My Library
       </a>
       <div className="navbar-nav mr-auto">
