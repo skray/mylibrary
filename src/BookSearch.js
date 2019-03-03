@@ -1,6 +1,20 @@
 import React, { Component } from 'react';
+import Button from 'react-bootstrap/Button';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCircleNotch } from '@fortawesome/free-solid-svg-icons'
 import axios from 'axios';
 import _debounce from 'lodash/debounce';
+import {faGithub} from '@fortawesome/free-brands-svg-icons';
+
+const extractAPIErrorMessage = (error) => {
+  if (error.response) {
+    return error.response.data ? error.response.data.message : error.response.data;
+  } else if (error.request) {
+    return "Error: could not make http request";
+  } else {
+    return error.message;
+  }
+}
 
 function Rating(props) {
   
@@ -12,6 +26,74 @@ function Rating(props) {
       <div className="full-stars" style={{ width: `${percentage}%` }} />
     </div>
   );
+}
+
+class SearchResult extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      adding: false,
+      error: null
+    };
+    
+    this.handleAddBookClicked = this.handleAddBookClicked.bind(this);
+  }
+  
+  handleAddBookClicked (book) {
+
+    this.setState({ adding: true });
+
+    axios.post(`https://api.mylibrary.cool/my-books`, 
+    {title: book.best_book.title}
+    )
+      .then((response) => {
+        this.setState({
+          adding: false,
+          added: true
+        });
+      })
+      .catch(error => {
+        this.setState({
+          adding: false,
+          added: false,
+          error: `Error adding book: ${extractAPIErrorMessage(error)}`,
+        });
+      });
+  }
+  
+  render() {
+    
+    let buttonContent = 
+      this.state.added ? 'In My Books' : 
+        this.state.adding ? (<span><FontAwesomeIcon icon={faCircleNotch} className="mr-1 fa-spin"/> Adding</span>)
+          : 'Add to My Books';
+
+    return (
+      <li className="list-group-item">
+        <div className="d-flex flex-row">
+          <div className="pr-2">
+            <img className="thumbnail" src={this.props.book.best_book.image_url} alt={`small thumbnail for ${this.props.book.best_book.title}`}/>
+          </div>
+          <div>
+            <h5>{this.props.book.best_book.title}
+              <span className="publication-year">{this.props.book.original_publication_year}</span></h5>
+            <div>
+              by {this.props.book.best_book.author.name} <Rating value={this.props.book.average_rating}/>
+              <span className="rating-average">{this.props.book.average_rating} Average Rating</span>
+            </div>
+            <Button 
+              className="add-btn"
+              variant="info" 
+              disabled={this.state.adding || this.state.added}
+              onClick={() => this.handleAddBookClicked(this.props.book)}>
+              { buttonContent }
+            </Button>
+          </div>
+        </div>
+      </li>
+    );
+  }
 }
 
 class BookSearch extends Component {
@@ -27,25 +109,37 @@ class BookSearch extends Component {
     
   }
 
+  componentDidMount() {
+    this.searchBooks('sapiens');
+  }
+
+  debouncedSearch = _debounce((query) => {
+    this.searchBooks(query);
+  },300);
+
+  handleSearchChange (e) {
+    this.debouncedSearch(e.target.value);
+  }
+
   searchBooks (query) {
     if(!query) {
       this.setState({message: '', books: []});
     } else {
 
-      if(this.source) {
-        this.source.cancel();
+      if(this.searchBooksSource) {
+        this.searchBooksSource.cancel();
       }
-      this.source = axios.CancelToken.source();
+      this.searchBooksSource = axios.CancelToken.source();
 
       this.setState({message: 'Loading'});
       axios.get(`https://api.mylibrary.cool/books`, {
         params: {
           q: query
         },
-        cancelToken: this.source.token
+        cancelToken: this.searchBooksSource.token
       })
         .then((response) => {
-          this.source = null;
+          this.searchBooksSource = null;
           let body = response.data;
 
           if(body['total-results'] > 0) {
@@ -61,25 +155,17 @@ class BookSearch extends Component {
           }
         })
         .catch(error => {
-          this.source = null;
+          this.searchBooksSource = null;
 
           if (!axios.isCancel(error)) {
             this.setState({
-              message: `Error searching books: ${error.message ? error.message : error}`,
+              message: `Error searching books: ${extractAPIErrorMessage(error)}`,
               books: []
             });
           }
         });
     }
 
-  }
-
-  debouncedSearch = _debounce((query) => {
-    this.searchBooks(query);
-  },300);
-
-  handleSearchChange (e) {
-    this.debouncedSearch(e.target.value);
   }
   
   render()  {
@@ -91,19 +177,7 @@ class BookSearch extends Component {
     
         <ul className="p-0 list-group-flush">
           {this.state.books.map(book => (
-            <li className="list-group-item" key={book.id}>
-              <div className="d-flex flex-row">
-                <div className="pr-2">
-                  <img src={book.best_book.small_image_url} alt={`small thumbnail for ${book.best_book.title}`}/>
-                </div>
-                <div>
-                  <h5>{ book.best_book.title } <span className="publication-year">{book.original_publication_year}</span></h5>
-                  <div>
-                    by {book.best_book.author.name} <Rating value={book.average_rating}/> <span className="rating-average">{book.average_rating} Average Rating</span> 
-                  </div>
-                </div>
-              </div>
-            </li>
+            <SearchResult book={book} key={book.id}/>
           ))}
         </ul>
       </div>

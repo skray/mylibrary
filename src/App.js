@@ -1,9 +1,16 @@
 import React, { Component } from 'react';
+import { BrowserRouter, Switch, Route, NavLink } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faGithub } from '@fortawesome/free-brands-svg-icons'
 import booksLogo from "./media/books.png";
 
 import BookSearch from './BookSearch';
+
+function NoMatch() {
+  return (
+    <div>Not Found</div>
+  )
+}
 
 function Navigation() {
   return (
@@ -12,9 +19,14 @@ function Navigation() {
         <img src={booksLogo} className="d-inline-block mr-2" width="21" alt="" />
         My Library
       </a>
-      <div className="navbar-nav mr-auto">
-
-      </div>
+      <ul className="navbar-nav mr-auto">
+        <li className="nav-item">
+          <NavLink exact className="nav-link" to="/">Search</NavLink>
+        </li>
+        <li className="nav-item">
+          <NavLink className="nav-link" to="/my-books">My Books</NavLink>
+        </li>
+      </ul>
 
       <ul className="navbar-nav ml-auto">
         <li className="nav-item">
@@ -43,13 +55,18 @@ function Footer() {
 class App extends Component {
   render() {
     return (
-      <div id="wrapper">
-        <Navigation />
-        <div id="mainContent" className="container-fluid">
-          <BookSearch />
+      <BrowserRouter>
+        <div id="wrapper">
+          <Navigation />
+          <div id="mainContent" className="container-fluid">
+            <Switch>
+              <Route exact path="/" component={BookSearch} />
+              <Route component={NoMatch} />
+            </Switch>
+          </div>
+          <Footer />
         </div>
-        <Footer />
-      </div>
+      </BrowserRouter>
     );
   }
 }
