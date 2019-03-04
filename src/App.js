@@ -5,6 +5,7 @@ import { faGithub } from '@fortawesome/free-brands-svg-icons'
 import booksLogo from "./media/books.png";
 
 import BookSearch from './BookSearch';
+import MyBooks from './MyBooks';
 
 function NoMatch() {
   return (
@@ -61,6 +62,7 @@ class App extends Component {
           <div id="mainContent" className="container-fluid">
             <Switch>
               <Route exact path="/" component={BookSearch} />
+              <Route exact path="/my-books" component={MyBooks} />
               <Route component={NoMatch} />
             </Switch>
           </div>

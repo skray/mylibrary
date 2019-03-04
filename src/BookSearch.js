@@ -4,29 +4,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCircleNotch } from '@fortawesome/free-solid-svg-icons'
 import axios from 'axios';
 import _debounce from 'lodash/debounce';
-import {faGithub} from '@fortawesome/free-brands-svg-icons';
-
-const extractAPIErrorMessage = (error) => {
-  if (error.response) {
-    return error.response.data ? error.response.data.message : error.response.data;
-  } else if (error.request) {
-    return "Error: could not make http request";
-  } else {
-    return error.message;
-  }
-}
-
-function Rating(props) {
-  
-  let percentage = 100 * (props.value / 5.0);
-  
-  return (
-    <div className="rating">
-      <div className="empty-stars" />
-      <div className="full-stars" style={{ width: `${percentage}%` }} />
-    </div>
-  );
-}
+import { extractAPIErrorMessage } from './utilities';
+import Rating from './Rating';
 
 class SearchResult extends Component {
   constructor(props) {
@@ -44,8 +23,15 @@ class SearchResult extends Component {
 
     this.setState({ adding: true });
 
-    axios.post(`https://api.mylibrary.cool/my-books`, 
-    {title: book.best_book.title}
+    axios.post(`https://api.mylibrary.cool/my-books`,
+      {
+        title: book.best_book.title,
+        author: book.best_book.author,
+        imageUrl: book.best_book.image_url,
+        goodReadsId: book.best_book.id,
+        publicationYear: book.original_publication_year,
+        goodReadsRating: book.average_rating
+      }
     )
       .then((response) => {
         this.setState({
@@ -77,7 +63,7 @@ class SearchResult extends Component {
           </div>
           <div>
             <h5>{this.props.book.best_book.title}
-              <span className="publication-year">{this.props.book.original_publication_year}</span></h5>
+              <span className="publication-year ml-1">{this.props.book.original_publication_year}</span></h5>
             <div>
               by {this.props.book.best_book.author.name} <Rating value={this.props.book.average_rating}/>
               <span className="rating-average">{this.props.book.average_rating} Average Rating</span>
@@ -110,7 +96,7 @@ class BookSearch extends Component {
   }
 
   componentDidMount() {
-    this.searchBooks('sapiens');
+    // this.searchBooks('sapiens');
   }
 
   debouncedSearch = _debounce((query) => {

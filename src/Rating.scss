@@ -1,0 +1,26 @@
+.Rating {
+  position: relative;
+  vertical-align: bottom;
+  display: inline-block;
+  color: #b1b1b1;
+  overflow: hidden;
+
+  .full-stars{
+    position: absolute;
+    left: 0;
+    top: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    color: #fde16d;
+  }
+
+  .empty-stars:before,
+  .full-stars:before {
+    content: "\2605\2605\2605\2605\2605";
+    font-size: 14pt;
+  }
+
+  .full-stars{
+    color: #ECBE24;
+  }
+}
