@@ -24,7 +24,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "predeploy": "npm run build",
-    "deploy": "aws s3 sync build/ s3://mylibrary.cool"
+    "deploy": "aws s3 sync build/ s3://mylibrary.cool --exclude \"index.html\"; aws s3 sync build/ s3://mylibrary.cool  --exclude \"*\" --include \"index.html\" --cache-control no-cache,no-store,must-revalidate"
   },
   "eslintConfig": {
     "extends": "react-app"
