@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import Button from 'react-bootstrap/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCircleNotch } from '@fortawesome/free-solid-svg-icons'
-import axios from 'axios';
+import { searchBooks, addToMyBooks } from './api';
 import _debounce from 'lodash/debounce';
 import { extractAPIErrorMessage } from './utilities';
 import Rating from './Rating';
@@ -23,17 +23,8 @@ class SearchResult extends Component {
 
     this.setState({ adding: true });
 
-    axios.post(`https://api.mylibrary.cool/my-books`,
-      {
-        title: book.best_book.title,
-        author: book.best_book.author,
-        imageUrl: book.best_book.image_url,
-        goodReadsId: book.best_book.id,
-        publicationYear: book.original_publication_year,
-        goodReadsRating: book.average_rating
-      }
-    )
-      .then((response) => {
+    addToMyBooks(book)
+      .then(() => {
         this.setState({
           adding: false,
           added: true
@@ -112,26 +103,17 @@ class BookSearch extends Component {
       this.setState({message: '', books: []});
     } else {
 
-      if(this.searchBooksSource) {
-        this.searchBooksSource.cancel();
-      }
-      this.searchBooksSource = axios.CancelToken.source();
-
-      this.setState({message: 'Loading'});
-      axios.get(`https://api.mylibrary.cool/books`, {
-        params: {
-          q: query
-        },
-        cancelToken: this.searchBooksSource.token
-      })
-        .then((response) => {
-          this.searchBooksSource = null;
-          let body = response.data;
-
-          if(body['total-results'] > 0) {
+      this.setState({message: 'Loading...'});
+      searchBooks(query)
+        .then((searchResults) => {
+          if(searchResults.canceled) {
+            return;
+          }
+          
+          if(searchResults['total-results'] > 0) {
             this.setState({
-              message: `Showing Results ${body['results-start']} - ${body['results-end']} of ${body['total-results']}`,
-              books: body.results.work
+              message: `Showing Results ${searchResults['results-start']} - ${searchResults['results-end']} of ${searchResults['total-results']}`,
+              books: searchResults.results.work
             });
           } else {
             this.setState({
@@ -141,14 +123,10 @@ class BookSearch extends Component {
           }
         })
         .catch(error => {
-          this.searchBooksSource = null;
-
-          if (!axios.isCancel(error)) {
-            this.setState({
-              message: `Error searching books: ${extractAPIErrorMessage(error)}`,
-              books: []
-            });
-          }
+          this.setState({
+            message: `Error searching books: ${extractAPIErrorMessage(error)}`,
+            books: []
+          });
         });
     }
 

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import Rating from './Rating';
-import axios from 'axios';
+import { getMyBooks } from './api';
 import {extractAPIErrorMessage} from './utilities';
 
 class MyBooks extends Component {
@@ -21,11 +21,11 @@ class MyBooks extends Component {
 
   loadMyBooks() {
     this.setState({loading: true});
-    axios.get(`https://api.mylibrary.cool/my-books`)
-      .then((response) => {
+    getMyBooks()
+      .then((books) => {
         this.setState({
           loading: false,
-          books: response.data,
+          books: books,
           error: null
         });
       })
