@@ -54,15 +54,15 @@ class MyBooks extends Component {
             <li className="list-group-item" key={book.id}>
               <div className="d-flex flex-row">
                 <div className="pr-2">
-                  <img className="thumbnail" src={book.imageUrl} alt={`book thumbnail`}/>
+                  <img className="thumbnail" src={book.goodReads.imageUrl} alt={`book thumbnail`}/>
                 </div>
                 <div>
                   <h5>{book.title}
                     <span className="publication-year ml-1">{book.publicationYear}</span>
                   </h5>
                   <div>
-                    by {book.author ? book.author.name : ''} <Rating value={book.goodReadsRating}/>
-                    <span className="rating-average">{book.goodReadsRating} Average Rating</span>
+                    by {book.author} <Rating value={book.goodReads.rating}/>
+                    <span className="rating-average">{book.goodReads.rating} Average Rating</span>
                   </div>
                 </div>
               </div>

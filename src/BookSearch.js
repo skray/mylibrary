@@ -50,14 +50,14 @@ class SearchResult extends Component {
       <li className="list-group-item">
         <div className="d-flex flex-row">
           <div className="pr-2">
-            <img className="thumbnail" src={this.props.book.best_book.image_url} alt={`small thumbnail for ${this.props.book.best_book.title}`}/>
+            <img className="thumbnail" src={this.props.book.goodReads.imageUrl} alt={`book thumbnail`}/>
           </div>
           <div>
-            <h5>{this.props.book.best_book.title}
-              <span className="publication-year ml-1">{this.props.book.original_publication_year}</span></h5>
+            <h5>{this.props.book.title}
+              <span className="publication-year ml-1">{this.props.book.publicationYear}</span></h5>
             <div>
-              by {this.props.book.best_book.author.name} <Rating value={this.props.book.average_rating}/>
-              <span className="rating-average">{this.props.book.average_rating} Average Rating</span>
+              by {this.props.book.author} <Rating value={this.props.book.goodReads.rating}/>
+              <span className="rating-average">{this.props.book.goodReads.rating} Average Rating</span>
             </div>
             <Button 
               className="add-btn"
@@ -110,10 +110,10 @@ class BookSearch extends Component {
             return;
           }
           
-          if(searchResults['total-results'] > 0) {
+          if(searchResults.totalResults > 0) {
             this.setState({
-              message: `Showing Results ${searchResults['results-start']} - ${searchResults['results-end']} of ${searchResults['total-results']}`,
-              books: searchResults.results.work
+              message: `Showing Results ${searchResults.resultsStart} - ${searchResults.resultsEnd} of ${searchResults.totalResults}`,
+              books: searchResults.books
             });
           } else {
             this.setState({
@@ -141,7 +141,7 @@ class BookSearch extends Component {
     
         <ul className="p-0 list-group-flush">
           {this.state.books.map(book => (
-            <SearchResult book={book} key={book.id}/>
+            <SearchResult book={book} key={book.goodReads.bookId}/>
           ))}
         </ul>
       </div>

@@ -41,16 +41,7 @@ export const getMyBooks = () => {
 }
 
 export const addToMyBooks = (book) => {
-  return axios.post(`${url}/my-books`,
-    {
-      title: book.best_book.title,
-      author: book.best_book.author,
-      imageUrl: book.best_book.image_url,
-      goodReadsId: book.best_book.id,
-      publicationYear: book.original_publication_year,
-      goodReadsRating: book.average_rating
-    }
-  )
+  return axios.post(`${url}/my-books`, book)
     .then((response) => {
       return response.data;
     });
